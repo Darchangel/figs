@@ -3,6 +3,7 @@
 open System
 open FSharp.Data
 open System.Xml.Linq
+open System.Collections.Generic
 
 
 module ConnectionStrings =
@@ -22,7 +23,7 @@ type private Config = XmlProvider<"file type samples/DotNetXmlConfig.config", Sa
 let public parse (fileString : String) =
     try
         match fileString with
-            | "" -> []
+            | "" -> dict([])
             | str -> 
                 let config = Config.Parse fileString
                 let appSettings = if config.AppSettings.IsSome then
@@ -35,24 +36,19 @@ let public parse (fileString : String) =
                                         else
                                           []
 
-                List.concat [appSettings; connectionStrings]
+                let allSettings = List.concat [appSettings; connectionStrings]
+
+                dict(allSettings)
     with
-        :? Exception as ex -> []
+        :? Exception as ex -> dict([])
 
+let private unzipSettings (settingsDict : IDictionary<string, string>) =
 
-let private unzipSettings settingList =
-    let rec unzipHelper appSettings connectionStrings (remainingSettingsList : (string * string) list) =
-        if remainingSettingsList.IsEmpty then
-            (List.rev appSettings, List.rev connectionStrings)
-        else
-            let name, value = remainingSettingsList.Head
-            if ConnectionStrings.isConnectionString name then
-                let cleanSetting = (ConnectionStrings.makeNormalName name, value)
-                unzipHelper appSettings (cleanSetting :: connectionStrings) remainingSettingsList.Tail
-            else
-                unzipHelper ((name, value) :: appSettings) connectionStrings remainingSettingsList.Tail
+    let appSettings = [for KeyValue(key, value) in settingsDict do if not (ConnectionStrings.isConnectionString key) then yield (key, value) ]
+    let connectionStrings = [for KeyValue(key, value) in settingsDict  do if (ConnectionStrings.isConnectionString key) then yield (key, value) ]
+
+    (appSettings, connectionStrings)
     
-    unzipHelper [] [] settingList
 
 let private buildAppSettingsXml (appSettingsList : (string * string) list) =
     if appSettingsList.IsEmpty then
@@ -65,7 +61,7 @@ let private buildConnectionStringsXml (connectionStringsList : (string * string)
     if connectionStringsList.IsEmpty then
         None
     else
-        let connectionStringElements = [for name, value in connectionStringsList do yield new XElement(XName.Get("add"), new XAttribute(XName.Get("name"), name), new XAttribute(XName.Get("connectionString"), value))]
+        let connectionStringElements = [for name, value in connectionStringsList do yield new XElement(XName.Get("add"), new XAttribute(XName.Get("name"), ConnectionStrings.makeNormalName name), new XAttribute(XName.Get("connectionString"), value))]
         Some (new XElement(XName.Get("connectionStrings"), connectionStringElements))
 
 let private buildConfigurationXml (appSettingsSection : option<XElement>) (connectionStringsSection : option<XElement>) =
@@ -75,8 +71,8 @@ let private buildConfigurationXml (appSettingsSection : option<XElement>) (conne
         | Some a, None -> new XElement(XName.Get("configuration"), a)
         | Some a, Some c -> new XElement(XName.Get("configuration"), a, c)
 
-let public write settingList =
-    let appSettings, connectionStrings = unzipSettings settingList
+let public write settingsDict =
+    let appSettings, connectionStrings = unzipSettings settingsDict
 
     let appSettingsSection =  buildAppSettingsXml appSettings
     let connectionStringsSection = buildConnectionStringsXml connectionStrings

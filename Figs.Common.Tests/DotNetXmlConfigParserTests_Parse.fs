@@ -1,27 +1,28 @@
 ﻿module Figs.Common.Tests.DotNetXmlConfigParserTests.Parse
 
+open System
 open Xunit
 open FsUnit.Xunit
 
 open Figs.Common
 
-let CONNECTION_STRING_PREFIX = DotNetXmlConfigParser.ConnectionStrings.CONNECTION_STRING_PREFIX
+let makeConnectionStringName = DotNetXmlConfigParser.ConnectionStrings.makeConnectionStringName
 
 [<Fact>]
-let ``parse with empty string returns an empty list``() =
+let ``parse with empty string returns an empty dictionary``() =
     let input = ""
     let output = DotNetXmlConfigParser.parse input
 
     output |> should be Empty
 
 [<Fact>]
-let ``parse with invalid XML returns an empty list``() =
+let ``parse with invalid XML returns an empty dictionary``() =
     let input = "something"
 
     DotNetXmlConfigParser.parse input |> should be Empty
 
 [<Fact>]
-let ``parse with valid XML but no appSettings / connectionStrings sections returns empty list``() =
+let ``parse with valid XML but no appSettings / connectionStrings sections returns empty dictionary``() =
     let input = @"<configuration>
                     <someOtherSection>
                     </someOtherSection>
@@ -30,7 +31,7 @@ let ``parse with valid XML but no appSettings / connectionStrings sections retur
     DotNetXmlConfigParser.parse input |> should be Empty
 
 [<Fact>]
-let ``parse with valid XML but empty appSettings section returns empty list``() =
+let ``parse with valid XML but empty appSettings section returns empty dictionary``() =
     let input = @"<configuration>
                     <appSettings>
                     </appSettings>
@@ -39,7 +40,7 @@ let ``parse with valid XML but empty appSettings section returns empty list``() 
     DotNetXmlConfigParser.parse input |> should be Empty
 
 [<Fact>]
-let ``parse with valid XML but empty connectionStrings section returns empty list``() =
+let ``parse with valid XML but empty connectionStrings section returns empty dictionary``() =
     let input = @"<configuration>
                     <connectionStrings>
                     </connectionStrings>
@@ -48,7 +49,7 @@ let ``parse with valid XML but empty connectionStrings section returns empty lis
     DotNetXmlConfigParser.parse input |> should be Empty
 
 [<Fact>]
-let ``parse with valid XML but empty appSettings and connectionStrings section returns empty list``() =
+let ``parse with valid XML but empty appSettings and connectionStrings section returns empty dictionary``() =
     let input = @"<configuration>
                     <appSettings>
                     </appSettings>
@@ -59,7 +60,7 @@ let ``parse with valid XML but empty appSettings and connectionStrings section r
     DotNetXmlConfigParser.parse input |> should be Empty
 
 [<Fact>]
-let ``parse with valid XML and only appSettings section returns list with appropriate setting``() =
+let ``parse with valid XML and only appSettings section returns dictionary with appropriate setting``() =
     let input = @"<configuration>
                     <appSettings>
                         <add key=""TestKey"" value=""TestValue"" />
@@ -67,24 +68,24 @@ let ``parse with valid XML and only appSettings section returns list with approp
                   </configuration>"
 
 
-    let expectedResult = [("TestKey", "TestValue")]
-    DotNetXmlConfigParser.parse input |> should equal expectedResult
+    let dictionary = (DotNetXmlConfigParser.parse input)
+    dictionary.Item("TestKey") |> should equal "TestValue"
 
 [<Fact>]
-let ``parse with valid XML and only connectionStrings section returns list with appropriate setting``() =
+let ``parse with valid XML and only connectionStrings section returns dictionary with appropriate setting``() =
     let input = @"<configuration>
                     <connectionStrings>
                         <add name=""TestName"" connectionString=""TestConnectionString"" />
                     </connectionStrings>
                   </configuration>"
 
+    let outputDictionary = DotNetXmlConfigParser.parse input
 
-    let expectedName = CONNECTION_STRING_PREFIX + "TestName"
-    let expectedResult = [(expectedName, "TestConnectionString")]
-    DotNetXmlConfigParser.parse input |> should equal expectedResult
+    let parsedConnectionStringName = makeConnectionStringName "TestName"
+    outputDictionary.Item(parsedConnectionStringName) |> should equal  "TestConnectionString"
 
 [<Fact>]
-let ``parse with valid XML and both appSettings and connectionStrings sections with a single setting each returns list with all settings``() =
+let ``parse with valid XML and both appSettings and connectionStrings sections with a single setting each returns dictionary with all settings``() =
     let input = @"<configuration>
                     <connectionStrings>
                         <add name=""TestName"" connectionString=""TestConnectionString"" />
@@ -95,21 +96,16 @@ let ``parse with valid XML and both appSettings and connectionStrings sections w
                   </configuration>"
 
 
-    let expectedConnectionStringName = CONNECTION_STRING_PREFIX + "TestName"
-    let expectedConnectionStringResult = (expectedConnectionStringName, "TestConnectionString")
+    let expectedConnectionStringName = makeConnectionStringName "TestName"
 
-    let expectedAppSettingsResult = ("TestKey", "TestValue")
+    let outputDictionary = DotNetXmlConfigParser.parse input
 
-    let expectedResult = [expectedAppSettingsResult; expectedConnectionStringResult]
+    outputDictionary.Item("TestKey") |> should equal "TestValue"
+    outputDictionary.Item(expectedConnectionStringName) |> should equal "TestConnectionString"
 
-    DotNetXmlConfigParser.parse input |> should equal expectedResult
-
-
-
-let listsAreEqual list1 list2 =  set list1 = set list2
 
 [<Fact>]
-let ``parse with valid XML and both appSettings and connectionStrings sections with multiple setting each returns list with all settings``() =
+let ``parse with valid XML and both appSettings and connectionStrings sections with multiple setting each returns dictionary with all settings``() =
     let input = @"<configuration>
                     <connectionStrings>
                         <add name=""TestName1"" connectionString=""TestConnectionString1"" />
@@ -123,18 +119,16 @@ let ``parse with valid XML and both appSettings and connectionStrings sections w
                   </configuration>"
 
 
-    let expectedConnectionStringName1 = CONNECTION_STRING_PREFIX + "TestName1"
-    let expectedConnectionStringName2 = CONNECTION_STRING_PREFIX + "TestName2"
-    let expectedConnectionStringName3 = CONNECTION_STRING_PREFIX + "TestName3"
-    let expectedConnectionStringResult1 = (expectedConnectionStringName1, "TestConnectionString1")
-    let expectedConnectionStringResult2 = (expectedConnectionStringName2, "TestConnectionString2")
-    let expectedConnectionStringResult3 = (expectedConnectionStringName3, "TestConnectionString3")
+    let expectedConnectionStringName1 = makeConnectionStringName "TestName1"
+    let expectedConnectionStringName2 = makeConnectionStringName "TestName2"
+    let expectedConnectionStringName3 = makeConnectionStringName "TestName3"
 
-    let expectedAppSettingsResult1 = ("TestKey1", "TestValue1")
-    let expectedAppSettingsResult2 = ("TestKey2", "TestValue2")
+    let outputDictionary = DotNetXmlConfigParser.parse input
 
-    let expectedResult = [expectedAppSettingsResult1; expectedAppSettingsResult2; expectedConnectionStringResult1; expectedConnectionStringResult2; expectedConnectionStringResult3]
-    let result = DotNetXmlConfigParser.parse input
+    outputDictionary.Item(expectedConnectionStringName1) |> should equal "TestConnectionString1"
+    outputDictionary.Item(expectedConnectionStringName2) |> should equal "TestConnectionString2"
+    outputDictionary.Item(expectedConnectionStringName3) |> should equal "TestConnectionString3"
 
-    listsAreEqual result expectedResult |> should equal true
+    outputDictionary.Item("TestKey1") |> should equal "TestValue1"
+    outputDictionary.Item("TestKey2") |> should equal "TestValue2"
 
