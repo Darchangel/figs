@@ -55,10 +55,8 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="DotNetXmlConfigParserTests_Write.fs" />
     <Content Include="packages.config" />
     <Content Include="App.config" />
-    <Compile Include="DotNetXmlConfigParserTests_Parse.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">

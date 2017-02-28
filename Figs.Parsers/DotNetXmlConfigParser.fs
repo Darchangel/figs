@@ -1,4 +1,4 @@
-﻿module Figs.Common.DotNetXmlConfigParser
+﻿module Figs.Parsers.DotNetXmlConfigParser
 
 open System
 open FSharp.Data

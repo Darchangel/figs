@@ -1,10 +1,10 @@
-﻿module Figs.Common.Tests.DotNetXmlConfigParserTests.Parse
+﻿module Figs.Parsers.Tests.DotNetXmlConfigParserTests.Parse
 
 open System
 open Xunit
 open FsUnit.Xunit
 
-open Figs.Common
+open Figs.Parsers
 
 let makeConnectionStringName = DotNetXmlConfigParser.ConnectionStrings.makeConnectionStringName
 

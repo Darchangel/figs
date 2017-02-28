@@ -7,9 +7,13 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Figs.Common", "Figs.Common\
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Figs.Common.Tests", "Figs.Common.Tests\Figs.Common.Tests.fsproj", "{3FCA34CA-5AE1-43A6-8161-33D73B64305F}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "file type samples", "file type samples", "{C06F609B-23C5-4F32-A44B-9D485139102C}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Figs.Parsers", "Figs.Parsers\Figs.Parsers.fsproj", "{401A1696-981D-4912-B2C5-1A77315950F9}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Figs.Parsers.Tests", "Figs.Parsers.Tests\Figs.Parsers.Tests.fsproj", "{B78B0F1A-F954-4747-A22E-E4963C780EC0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Parser file type samples", "Parser file type samples", "{7B38D0C3-8AE9-4998-97D6-AF960450F92C}"
 	ProjectSection(SolutionItems) = preProject
-		Figs.Common\file type samples\DotNetXmlConfig.config = Figs.Common\file type samples\DotNetXmlConfig.config
+		Figs.Parsers\file type samples\DotNetXmlConfig.config = Figs.Parsers\file type samples\DotNetXmlConfig.config
 	EndProjectSection
 EndProject
 Global
@@ -26,6 +30,14 @@ Global
 		{3FCA34CA-5AE1-43A6-8161-33D73B64305F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FCA34CA-5AE1-43A6-8161-33D73B64305F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3FCA34CA-5AE1-43A6-8161-33D73B64305F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{401A1696-981D-4912-B2C5-1A77315950F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{401A1696-981D-4912-B2C5-1A77315950F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{401A1696-981D-4912-B2C5-1A77315950F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{401A1696-981D-4912-B2C5-1A77315950F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B78B0F1A-F954-4747-A22E-E4963C780EC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B78B0F1A-F954-4747-A22E-E4963C780EC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B78B0F1A-F954-4747-A22E-E4963C780EC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B78B0F1A-F954-4747-A22E-E4963C780EC0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
