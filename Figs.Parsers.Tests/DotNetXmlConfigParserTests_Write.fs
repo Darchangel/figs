@@ -10,7 +10,7 @@ let makeConnectionStringName = DotNetXmlConfigParser.ConnectionStrings.makeConne
 
 [<Fact>]
 let ``write with empty list returns empty but valid xml string``() =
-    let input = dict([])
+    let input = Map.empty<string, string>
     let expectedXml = new XElement(XName.Get("configuration"))
 
     let output = DotNetXmlConfigParser.write input
@@ -20,7 +20,7 @@ let ``write with empty list returns empty but valid xml string``() =
 
 [<Fact>]
 let ``write with single app setting returns xml string with correct appSettings section only``() =
-    let input = dict([("TestKey", "TestValue")])
+    let input = Map.ofSeq([("TestKey", "TestValue")])
     let expectedOutput = @"<configuration>
                                 <appSettings>
                                     <add key=""TestKey"" value=""TestValue"" />
@@ -35,7 +35,7 @@ let ``write with single app setting returns xml string with correct appSettings 
 
 [<Fact>]
 let ``write with single connection string returns xml string with correct connectionStrings section only``() =
-    let input = dict([(makeConnectionStringName("TestName"), "TestConnectionString")])
+    let input = Map.ofSeq([(makeConnectionStringName("TestName"), "TestConnectionString")])
     let expectedOutput = @"<configuration>
                                 <connectionStrings>
                                     <add name=""TestName"" connectionString=""TestConnectionString"" />
@@ -50,7 +50,7 @@ let ``write with single connection string returns xml string with correct connec
 
 [<Fact>]
 let ``write with multiple app settings returns xml string with correct appSettings only, in order``() =
-    let input = dict([("TestKey1", "TestValue1");
+    let input = Map.ofSeq([("TestKey1", "TestValue1");
                       ("TestKey2", "TestValue2");
                       ("TestKey3", "TestValue3")])
     let expectedOutput = @"<configuration>
@@ -69,7 +69,7 @@ let ``write with multiple app settings returns xml string with correct appSettin
 
 [<Fact>]
 let ``write with multiple connection strings returns xml string with correct connectionStrings only, in order``() =
-    let input = dict([(makeConnectionStringName("TestName1"), "TestConnectionString1");
+    let input = Map.ofSeq([(makeConnectionStringName("TestName1"), "TestConnectionString1");
                       (makeConnectionStringName("TestName2"), "TestConnectionString2");
                       (makeConnectionStringName("TestName3"), "TestConnectionString3")])
     let expectedOutput = @"<configuration>
@@ -88,7 +88,7 @@ let ``write with multiple connection strings returns xml string with correct con
 
 [<Fact>]
 let ``write with multiple app settings and connection strings returns correct xml string with all settings in order``() =
-    let input = dict([(makeConnectionStringName("TestName1"), "TestConnectionString1");
+    let input = Map.ofSeq([(makeConnectionStringName("TestName1"), "TestConnectionString1");
                       ("TestKey1", "TestValue1");
                       ("TestKey2", "TestValue2");
                       (makeConnectionStringName("TestName2"), "TestConnectionString2");

@@ -9,20 +9,20 @@ open Figs.Parsers
 let makeConnectionStringName = DotNetXmlConfigParser.ConnectionStrings.makeConnectionStringName
 
 [<Fact>]
-let ``parse with empty string returns an empty dictionary``() =
+let ``parse with empty string returns an empty map``() =
     let input = ""
     let output = DotNetXmlConfigParser.parse input
 
     output |> should be Empty
 
 [<Fact>]
-let ``parse with invalid XML returns an empty dictionary``() =
+let ``parse with invalid XML returns an empty map``() =
     let input = "something"
 
     DotNetXmlConfigParser.parse input |> should be Empty
 
 [<Fact>]
-let ``parse with valid XML but no appSettings / connectionStrings sections returns empty dictionary``() =
+let ``parse with valid XML but no appSettings / connectionStrings sections returns empty map``() =
     let input = @"<configuration>
                     <someOtherSection>
                     </someOtherSection>
@@ -31,7 +31,7 @@ let ``parse with valid XML but no appSettings / connectionStrings sections retur
     DotNetXmlConfigParser.parse input |> should be Empty
 
 [<Fact>]
-let ``parse with valid XML but empty appSettings section returns empty dictionary``() =
+let ``parse with valid XML but empty appSettings section returns empty map``() =
     let input = @"<configuration>
                     <appSettings>
                     </appSettings>
@@ -40,7 +40,7 @@ let ``parse with valid XML but empty appSettings section returns empty dictionar
     DotNetXmlConfigParser.parse input |> should be Empty
 
 [<Fact>]
-let ``parse with valid XML but empty connectionStrings section returns empty dictionary``() =
+let ``parse with valid XML but empty connectionStrings section returns empty map``() =
     let input = @"<configuration>
                     <connectionStrings>
                     </connectionStrings>
@@ -49,7 +49,7 @@ let ``parse with valid XML but empty connectionStrings section returns empty dic
     DotNetXmlConfigParser.parse input |> should be Empty
 
 [<Fact>]
-let ``parse with valid XML but empty appSettings and connectionStrings section returns empty dictionary``() =
+let ``parse with valid XML but empty appSettings and connectionStrings section returns empty map``() =
     let input = @"<configuration>
                     <appSettings>
                     </appSettings>
@@ -60,7 +60,7 @@ let ``parse with valid XML but empty appSettings and connectionStrings section r
     DotNetXmlConfigParser.parse input |> should be Empty
 
 [<Fact>]
-let ``parse with valid XML and only appSettings section returns dictionary with appropriate setting``() =
+let ``parse with valid XML and only appSettings section returns map with appropriate setting``() =
     let input = @"<configuration>
                     <appSettings>
                         <add key=""TestKey"" value=""TestValue"" />
@@ -68,24 +68,24 @@ let ``parse with valid XML and only appSettings section returns dictionary with 
                   </configuration>"
 
 
-    let dictionary = (DotNetXmlConfigParser.parse input)
-    dictionary.Item("TestKey") |> should equal "TestValue"
+    let map = (DotNetXmlConfigParser.parse input)
+    map.["TestKey"] |> should equal "TestValue"
 
 [<Fact>]
-let ``parse with valid XML and only connectionStrings section returns dictionary with appropriate setting``() =
+let ``parse with valid XML and only connectionStrings section returns map with appropriate setting``() =
     let input = @"<configuration>
                     <connectionStrings>
                         <add name=""TestName"" connectionString=""TestConnectionString"" />
                     </connectionStrings>
                   </configuration>"
 
-    let outputDictionary = DotNetXmlConfigParser.parse input
+    let outputMap = DotNetXmlConfigParser.parse input
 
     let parsedConnectionStringName = makeConnectionStringName "TestName"
-    outputDictionary.Item(parsedConnectionStringName) |> should equal  "TestConnectionString"
+    outputMap.[parsedConnectionStringName] |> should equal  "TestConnectionString"
 
 [<Fact>]
-let ``parse with valid XML and both appSettings and connectionStrings sections with a single setting each returns dictionary with all settings``() =
+let ``parse with valid XML and both appSettings and connectionStrings sections with a single setting each returns map with all settings``() =
     let input = @"<configuration>
                     <connectionStrings>
                         <add name=""TestName"" connectionString=""TestConnectionString"" />
@@ -98,14 +98,14 @@ let ``parse with valid XML and both appSettings and connectionStrings sections w
 
     let expectedConnectionStringName = makeConnectionStringName "TestName"
 
-    let outputDictionary = DotNetXmlConfigParser.parse input
+    let outputMap = DotNetXmlConfigParser.parse input
 
-    outputDictionary.Item("TestKey") |> should equal "TestValue"
-    outputDictionary.Item(expectedConnectionStringName) |> should equal "TestConnectionString"
+    outputMap.["TestKey"] |> should equal "TestValue"
+    outputMap.[expectedConnectionStringName] |> should equal "TestConnectionString"
 
 
 [<Fact>]
-let ``parse with valid XML and both appSettings and connectionStrings sections with multiple setting each returns dictionary with all settings``() =
+let ``parse with valid XML and both appSettings and connectionStrings sections with multiple setting each returns map with all settings``() =
     let input = @"<configuration>
                     <connectionStrings>
                         <add name=""TestName1"" connectionString=""TestConnectionString1"" />
@@ -123,12 +123,12 @@ let ``parse with valid XML and both appSettings and connectionStrings sections w
     let expectedConnectionStringName2 = makeConnectionStringName "TestName2"
     let expectedConnectionStringName3 = makeConnectionStringName "TestName3"
 
-    let outputDictionary = DotNetXmlConfigParser.parse input
+    let outputMap = DotNetXmlConfigParser.parse input
 
-    outputDictionary.Item(expectedConnectionStringName1) |> should equal "TestConnectionString1"
-    outputDictionary.Item(expectedConnectionStringName2) |> should equal "TestConnectionString2"
-    outputDictionary.Item(expectedConnectionStringName3) |> should equal "TestConnectionString3"
+    outputMap.[expectedConnectionStringName1] |> should equal "TestConnectionString1"
+    outputMap.[expectedConnectionStringName2] |> should equal "TestConnectionString2"
+    outputMap.[expectedConnectionStringName3] |> should equal "TestConnectionString3"
 
-    outputDictionary.Item("TestKey1") |> should equal "TestValue1"
-    outputDictionary.Item("TestKey2") |> should equal "TestValue2"
+    outputMap.["TestKey1"] |> should equal "TestValue1"
+    outputMap.["TestKey2"] |> should equal "TestValue2"
 

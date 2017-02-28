@@ -23,7 +23,7 @@ type private Config = XmlProvider<"file type samples/DotNetXmlConfig.config", Sa
 let public parse (fileString : String) =
     try
         match fileString with
-            | "" -> dict([])
+            | "" -> Map.empty<string, string>
             | str -> 
                 let config = Config.Parse fileString
                 let appSettings = if config.AppSettings.IsSome then
@@ -38,14 +38,14 @@ let public parse (fileString : String) =
 
                 let allSettings = List.concat [appSettings; connectionStrings]
 
-                dict(allSettings)
+                Map.ofSeq allSettings
     with
-        :? Exception as ex -> dict([])
+        :? Exception as ex -> Map.empty<string, string>
 
-let private unzipSettings (settingsDict : IDictionary<string, string>) =
+let private unzipSettings (settingsMap : Map<string, string>) =
 
-    let appSettings = [for KeyValue(key, value) in settingsDict do if not (ConnectionStrings.isConnectionString key) then yield (key, value) ]
-    let connectionStrings = [for KeyValue(key, value) in settingsDict  do if (ConnectionStrings.isConnectionString key) then yield (key, value) ]
+    let appSettings = [for KeyValue(key, value) in settingsMap do if not (ConnectionStrings.isConnectionString key) then yield (key, value) ]
+    let connectionStrings = [for KeyValue(key, value) in settingsMap  do if (ConnectionStrings.isConnectionString key) then yield (key, value) ]
 
     (appSettings, connectionStrings)
     
@@ -71,8 +71,8 @@ let private buildConfigurationXml (appSettingsSection : option<XElement>) (conne
         | Some a, None -> new XElement(XName.Get("configuration"), a)
         | Some a, Some c -> new XElement(XName.Get("configuration"), a, c)
 
-let public write settingsDict =
-    let appSettings, connectionStrings = unzipSettings settingsDict
+let public write settingsMap =
+    let appSettings, connectionStrings = unzipSettings settingsMap
 
     let appSettingsSection =  buildAppSettingsXml appSettings
     let connectionStringsSection = buildConnectionStringsXml connectionStrings
